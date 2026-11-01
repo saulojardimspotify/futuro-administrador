@@ -2,7 +2,7 @@
 // Usa a porta 8080 ou a próxima livre. "node server.js --no-open" não abre o navegador.
 const http = require('http'), fs = require('fs'), path = require('path'), { exec } = require('child_process');
 const root = __dirname;
-const types = { '.html':'text/html; charset=utf-8', '.js':'text/javascript', '.json':'application/manifest+json', '.png':'image/png', '.svg':'image/svg+xml', '.webp':'image/webp', '.jpg':'image/jpeg' };
+const types = { '.html':'text/html; charset=utf-8', '.js':'text/javascript', '.json':'application/manifest+json', '.png':'image/png', '.svg':'image/svg+xml', '.webp':'image/webp', '.jpg':'image/jpeg', '.mp3':'audio/mpeg' };
 
 const server = http.createServer((req, res) => {
   let p = decodeURIComponent(req.url.split('?')[0]);
