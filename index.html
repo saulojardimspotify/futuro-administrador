@@ -513,12 +513,14 @@ function sfx(n) {
   else if (n === 'achv') { tone(988, .1, 'triangle', .06); tone(1318, .2, 'triangle', .06, .1); }
   else if (n === 'over') [392, 330, 262, 196].forEach((f, i) => tone(f, .25, 'triangle', .07, i * .18));
 }
-function updMute() { $('#muteInfo').innerHTML = (muted ? '🔇 Sem som' : '🔊 Som') + (TOUCH ? '' : ': <kbd>M</kbd>'); }
+function updMute() { if (muted) { try { finalSnd.pause(); applauseSnd.pause(); } catch (e) {} }
+  $('#muteInfo').innerHTML = (muted ? '🔇 Sem som' : '🔊 Som') + (TOUCH ? '' : ': <kbd>M</kbd>'); }
 updMute();
 
 /* ================= TELAS ================= */
 let curScreen = 'menu', achvReturn = 'menu';
 function show(id) {
+  if (id !== 'grad' && id !== 'achv') finalSnd.pause(); // música do Parabéns continua só nessas telas
   curScreen = id;
   document.querySelectorAll('.screen').forEach(s => s.classList.toggle('active', s.id === id));
   if (id === 'menu') drawMenuBg();
@@ -783,6 +785,9 @@ function updateFinale(dt) {
 }
 // Aplausos reais (sons/applause.mp3) quando o aluno recebe o diploma
 const applauseSnd = new Audio('sons/applause.mp3'); applauseSnd.preload = 'auto';
+// Música da tela de Parabéns (sons/final.mp3); para quando o aluno sai dessa tela
+const finalSnd = new Audio('sons/final.mp3'); finalSnd.preload = 'auto';
+function playFinal() { if (muted) return; try { applauseSnd.pause(); finalSnd.currentTime = 0; finalSnd.volume = .9; finalSnd.play().catch(() => {}); } catch (e) {} }
 function applause() {
   if (muted) return;
   try { applauseSnd.currentTime = 0; applauseSnd.volume = .9; applauseSnd.play().catch(() => {}); } catch (e) {}
@@ -806,7 +811,7 @@ function gameOver() {
 function graduate() {
   if (G.state === 'grad') return;
   G.state = 'grad'; G.score += 2000 + G.hearts * 500;
-  saveRank(true); sfx('grad');
+  saveRank(true); playFinal();
   unlock('formado'); if (G.hits === 0) unlock('cdf'); if (G.badHits === 0) unlock('focado');
   setTimeout(() => {
     show('grad');
