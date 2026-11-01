@@ -1,5 +1,5 @@
 // Service worker: cache do jogo para funcionar offline na feira
-const CACHE = 'futuro-adm-v5';
+const CACHE = 'futuro-adm-v6';
 const ASSETS = ['./', './index.html', './manifest.json', './icons/icon-192.png', './icons/icon-512.png', './assets/logo-ise.png', './assets/predio-isecensa.webp'];
 
 self.addEventListener('install', e => {
