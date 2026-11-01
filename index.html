@@ -143,9 +143,9 @@ kbd{display:inline-block;background:#fff;color:#14205a;border-radius:6px;padding
   <section id="howto" class="screen plain">
     <h2>Como Jogar</h2>
     <div class="panel howto">
-      <p>Você é aluno do <b>Curso de Administração do ISE</b>. Corra pelo corredor da faculdade e colete <b>15 disciplinas</b> para conquistar o seu <b>diploma</b>!</p>
+      <p>Você é aluno do <b>Curso de Administração do ISE</b>. Corra pelo corredor da faculdade e colete <b>25 disciplinas</b> para conquistar o seu <b>diploma</b>!</p>
       <div class="it"><span>⌨️</span><div>Use as setas <kbd>←</kbd> <kbd>→</kbd> para trocar de faixa. <kbd>P</kbd> pausa o jogo.</div></div>
-      <div class="it"><span>📘</span><div>Cada <b>disciplina</b> (Valuation, TGA, RH, Marketing...) aumenta sua <b>pontuação</b> e o seu <b>progresso acadêmico</b>.</div></div>
+      <div class="it"><span>📘</span><div>Cada <b>disciplina</b> (Valuation, TGA, Marketing, Direito...), com a foto do professor, aumenta sua <b>pontuação</b> e o seu <b>progresso acadêmico</b>.</div></div>
       <div class="it"><span>📝</span><div>A <b>Reprovação</b> tira uma <b>vida</b>. Perdeu as 3, trancou a matrícula!</div></div>
       <div class="it"><span>🎉</span><div><b>Festas</b> e <b>Bebidas</b> são obstáculos: se bater, perde pontos e uma disciplina.</div></div>
       <div class="it"><span>☕</span><div>O <b>Café</b> devolve uma vida. Ninguém se forma sem café!</div></div>
@@ -196,7 +196,7 @@ kbd{display:inline-block;background:#fff;color:#14205a;border-radius:6px;padding
     </div>
     <div class="side right">
       <div class="ttl">🎓 Progresso acadêmico</div>
-      <div class="bigBar"><i id="hudBar"></i><span id="hudCount">0 / 15 disciplinas</span></div>
+      <div class="bigBar"><i id="hudBar"></i><span id="hudCount">0 / 25 disciplinas</span></div>
       <ul class="hist" id="hudHist"></ul>
       <div class="legend">
         <span>📘</span><span>Disciplina: +100 pontos</span>
@@ -394,14 +394,29 @@ function avatarTo(canvas, ci, opt = {}) {
 function miniAvatar(ci) { const c = document.createElement('canvas'); c.width = c.height = 96; avatarTo(c, CHARS[ci] ? ci : 0); return c; }
 
 /* ================= DADOS ================= */
-const DISCS = ['Valuation','Produtos Financeiros','TGA','RH','Marketing','Economia','Contabilidade','Finanças',
-  'Estatística','Logística','Estratégia','Matemática Financeira','Empreendedorismo','Gestão de Projetos',
-  'Direito Empresarial','Mercado de Capitais','Gestão de Pessoas'];
-const BOOK_COLORS = ['#2f5fd0','#2a8f5a','#c0392b','#8e44ad','#d35400','#16a085','#2c3e9e','#b8860b'];
-const GOAL = 15; // disciplinas para conquistar o diploma (fase única)
+// Disciplinas e o(a) professor(a) de cada uma (a foto aparece no livro)
+const DISCS = [
+  { n:'Marketing', p:'lais' }, { n:'Prod. Financeiros', p:'chesil' }, { n:'Valuation', p:'saulo' },
+  { n:'Mat. Financeira', p:'saulo' }, { n:'TGA', p:'tulio' }, { n:'Gestão de Pessoas', p:'tulio' },
+  { n:'Política', p:'chesil' }, { n:'Contabilidade', p:'saulo' }, { n:'Finanças', p:'saulo' },
+  { n:'Estágio', p:'chesil' }, { n:'TCC', p:'lais' }, { n:'Economia', p:'saulo' },
+  { n:'ESG e Compliance', p:'frank' }, { n:'Administração', p:'tulio' }, { n:'Direito', p:'frank' },
+  { n:'Empreendedorismo', p:'tulio' }, { n:'Matemática', p:'terezinha' }, { n:'Logística', p:'lais' },
+];
+// Fotos: grade 3x2 em assets/professores.webp (cada foto ~500x427 px)
+const PROF_CELLS = { chesil:[7, 0], frank:[518, 0], terezinha:[1030, 0], lais:[7, 510], saulo:[518, 510], tulio:[1030, 510] };
+const PROF_PHOTOS = {};
+const profGrid = new Image(); profGrid.src = 'assets/professores.webp';
+profGrid.onload = () => {
+  for (const [k, [sx, sy]] of Object.entries(PROF_CELLS)) {
+    const c = document.createElement('canvas'); c.width = 498; c.height = 425;
+    c.getContext('2d').drawImage(profGrid, sx, sy + 1, 498, 425, 0, 0, 498, 425); PROF_PHOTOS[k] = c;
+  }
+};
+const GOAL = 25; // disciplinas para conquistar o diploma (fase única, com repetição)
 
 const ACHV = [
-  { id:'metade',  ic:'📈', t:'Meio do curso', d:'Colete 8 disciplinas em uma partida' },
+  { id:'metade',  ic:'📈', t:'Meio do curso', d:'Colete 13 disciplinas em uma partida' },
   { id:'formado', ic:'🎓', t:'Administrador', d:'Conquiste o diploma' },
   { id:'cdf',     ic:'💯', t:'Nota 10', d:'Forme-se sem nenhuma reprovação' },
   { id:'focado',  ic:'🎯', t:'Foco total', d:'Forme-se sem cair em festas ou bebidas' },
@@ -598,18 +613,18 @@ function updHud() {
   G.hist.slice(-7).reverse().forEach(n => { const li = document.createElement('li'); li.innerHTML = '<b>✔</b><span></span>'; li.lastChild.textContent = n; ul.appendChild(li); });
 }
 
-const speed = () => 480 + G.disc * 18;
+const speed = () => 480 + G.disc * 11;
 
 function spawnRow() {
   const lanes = [0, 1, 2].sort(() => Math.random() - .5), y = -90 * Z;
   const bad = () => { const r = Math.random(); return r < .4 ? 'reprov' : r < .7 ? 'festa' : 'bebida'; };
   const add = (lane, kind) => {
     const it = { lane, kind, x:LANES[lane], y, ph:Math.random() * 6 };
-    if (kind === 'disc') { it.name = DISCS[G.discIdx++ % DISCS.length]; it.color = BOOK_COLORS[G.discIdx % BOOK_COLORS.length]; }
+    if (kind === 'disc') { let i; do { i = Math.floor(Math.random() * DISCS.length); } while (i === G.lastDisc); G.lastDisc = i; it.name = DISCS[i].n; it.prof = DISCS[i].p; }
     G.items.push(it);
   };
   const r = Math.random(), lvl = G.disc / GOAL;
-  if (G.hearts < 3 && r < .05) { add(lanes[0], 'cafe'); return; }
+  if (G.hearts < 3 && r < .12) { add(lanes[0], 'cafe'); if (Math.random() < .5) add(lanes[1], 'disc'); return; }
   if (r < .55) {
     add(lanes[0], 'disc');
     if (Math.random() < .35 + lvl * .35) add(lanes[1], bad());
@@ -656,7 +671,7 @@ function collect(it) {
   G.score += 100; G.disc++; G.hist.push(it.name); prog.disc++; store.set('fa_prog', prog); sfx('coin');
   addFloat(it.x, it.y - 50, `+100 ${it.name}`, '#ffe066'); burst(it.x, it.y, '#ffe066', 30);
   if (prog.disc >= 50) unlock('nerd');
-  if (G.disc === 8) { unlock('metade'); G.banner = { t:2, a:'Metade do curso!', b:'Continue assim!' }; sfx('level'); }
+  if (G.disc === Math.ceil(GOAL / 2)) { unlock('metade'); G.banner = { t:2, a:'Metade do curso!', b:'Continue assim!' }; sfx('level'); }
   updHud();
   if (G.disc >= GOAL) startFinale();
 }
@@ -666,7 +681,7 @@ function startFinale() {
   G.state = 'finale';
   G.fin = { phase:'run', t:0, gateY:-320, open:0, walk:0 };
   G.items.forEach(i => { i.dead = true; burst(i.x, i.y, '#9fb2f5', 10); });
-  G.banner = { t:2.4, a:'15 disciplinas!', b:'Siga para a Colação de Grau!' };
+  G.banner = { t:2.4, a:`${GOAL} disciplinas!`, b:'Siga para a Colação de Grau!' };
   sfx('level');
 }
 function updateFinale(dt) {
@@ -851,29 +866,42 @@ function drawPlant(x, y) {
 /* ----- Itens ----- */
 function glow(color, blur) { ctx.shadowColor = color; ctx.shadowBlur = blur; }
 function noGlow() { ctx.shadowBlur = 0; ctx.shadowColor = 'transparent'; }
+// Livro no modelo enviado: arco com a foto do professor atrás, livro verde com etiqueta clara na frente
 function drawBook(it, t) {
-  ctx.save(); ctx.translate(it.x, it.y + Math.sin(t * 4 + it.ph) * 3); ctx.rotate(-.05);
-  glow('#ffe066', 18 + Math.sin(t * 6 + it.ph) * 7);
-  rr(-54, -36, 110, 72, 9); ctx.fillStyle = shade(it.color, -.45); ctx.fill(); noGlow();
-  rr(-50, -30, 104, 62, 6); ctx.fillStyle = '#fbf3dc'; ctx.fill();
-  ctx.strokeStyle = 'rgba(150,120,70,.4)'; ctx.lineWidth = 1; for (let i = 0; i < 4; i++) { ctx.beginPath(); ctx.moveTo(-46, 26 + i * 1.6); ctx.lineTo(50, 26 + i * 1.6); ctx.stroke(); }
-  // capa
-  rr(-58, -40, 108, 68, 8);
-  const cg = ctx.createLinearGradient(0, -40, 0, 28); cg.addColorStop(0, shade(it.color, .2)); cg.addColorStop(1, shade(it.color, -.18));
-  ctx.fillStyle = cg; ctx.fill(); ctx.strokeStyle = shade(it.color, -.55); ctx.lineWidth = 2.5; ctx.stroke();
-  rr(-58, -40, 13, 68, 6); ctx.fillStyle = shade(it.color, -.3); ctx.fill();
-  ctx.fillStyle = '#f5c542'; ctx.fillRect(-58, -30, 13, 3); ctx.fillRect(-58, 16, 13, 3);
-  // etiqueta clara com o nome em letra escura (alto contraste)
-  rr(-41, -33, 87, 54, 7); ctx.fillStyle = '#fffdf5'; ctx.fill(); ctx.strokeStyle = '#f5c542'; ctx.lineWidth = 2.5; ctx.stroke();
-  const words = it.name.split(' '), maxW = 79;
-  const fit = (txt, s) => { ctx.font = `900 ${s}px "Trebuchet MS",sans-serif`; while (ctx.measureText(txt).width > maxW && s > 9) { s -= .5; ctx.font = `900 ${s}px "Trebuchet MS",sans-serif`; } return s; };
+  const bob = Math.sin(t * 4 + it.ph) * 3, pulse = (Math.sin(t * 6 + it.ph) + 1) / 2;
+  ctx.save(); ctx.translate(it.x, it.y + bob);
+  // raios amarelos dos lados do arco
+  ctx.strokeStyle = '#f5c542'; ctx.lineWidth = 4.5; ctx.lineCap = 'round';
+  const ray = (x1, y1, x2, y2) => { ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke(); };
+  const e = 2 * pulse;
+  ray(-40, -50, -46 - e, -58 - e); ray(-44, -36, -54 - e, -40 - e); ray(40, -50, 46 + e, -58 - e); ray(44, -36, 54 + e, -40 - e);
+  // arco com a foto
+  const arch = () => { ctx.beginPath(); ctx.moveTo(-32, -2); ctx.lineTo(-32, -26); ctx.arc(0, -26, 32, Math.PI, 0); ctx.lineTo(32, -2); ctx.closePath(); };
+  glow('#ffe066', 14 + pulse * 8); arch();
+  const sky = ctx.createRadialGradient(0, -30, 4, 0, -26, 40); sky.addColorStop(0, '#d6efff'); sky.addColorStop(1, '#6db8f2');
+  ctx.fillStyle = sky; ctx.fill(); noGlow();
+  const ph = PROF_PHOTOS[it.prof];
+  if (ph) { ctx.save(); arch(); ctx.clip(); ctx.imageSmoothingQuality = 'high'; ctx.drawImage(ph, -32, -58, 64, 64 * ph.height / ph.width); ctx.restore(); }
+  arch(); ctx.strokeStyle = '#f5c542'; ctx.lineWidth = 4; ctx.stroke();
+  // páginas e capa verde
+  rr(-49, 36, 101, 10, 4); ctx.fillStyle = '#fbf3dc'; ctx.fill(); ctx.strokeStyle = '#1d6b33'; ctx.lineWidth = 2; ctx.stroke();
+  ctx.strokeStyle = 'rgba(150,120,70,.4)'; ctx.lineWidth = 1; for (let i = 0; i < 3; i++) { ctx.beginPath(); ctx.moveTo(-44, 39 + i * 2.2); ctx.lineTo(48, 39 + i * 2.2); ctx.stroke(); }
+  rr(-55, -6, 110, 46, 9);
+  const cg = ctx.createLinearGradient(0, -6, 0, 40); cg.addColorStop(0, '#35b85a'); cg.addColorStop(1, '#1e8a3c');
+  ctx.fillStyle = cg; ctx.fill(); ctx.strokeStyle = '#155e2a'; ctx.lineWidth = 2.5; ctx.stroke();
+  rr(-55, -6, 13, 46, 6); ctx.fillStyle = '#1f7a37'; ctx.fill();
+  ctx.fillStyle = '#f5c542'; rr(-57, 2, 17, 6, 2); ctx.fill(); rr(-57, 26, 17, 6, 2); ctx.fill();
+  // etiqueta com o nome
+  rr(-39, -1, 86, 36, 6); ctx.fillStyle = '#fdf8ec'; ctx.fill(); ctx.strokeStyle = '#f5c542'; ctx.lineWidth = 3; ctx.stroke();
+  const maxW = 78, words = it.name.split(' ');
+  const fit = (txt, s) => { ctx.font = `900 ${s}px "Trebuchet MS",sans-serif`; while (ctx.measureText(txt).width > maxW && s > 8) { s -= .5; ctx.font = `900 ${s}px "Trebuchet MS",sans-serif`; } return s; };
   let lines = [it.name];
-  if (words.length > 1 && fit(it.name, 20) < 15) { const m = Math.ceil(words.length / 2); lines = [words.slice(0, m).join(' '), words.slice(m).join(' ')]; }
-  const sizes = lines.map(l => fit(l, lines.length > 1 ? 17 : 21)), s = Math.min(...sizes);
+  if (words.length > 1 && fit(it.name, 17) < 14) { const m = Math.ceil(words.length / 2); lines = [words.slice(0, m).join(' '), words.slice(m).join(' ')]; }
+  const s = Math.min(...lines.map(l => fit(l, lines.length > 1 ? 14.5 : 17)));
   ctx.fillStyle = '#14205a'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.font = `900 ${s}px "Trebuchet MS",sans-serif`;
-  lines.forEach((l, i) => ctx.fillText(l, 2.5, -6 + (lines.length > 1 ? (i - .5) * (s + 3) : 0)));
+  lines.forEach((l, i) => ctx.fillText(l, 4, 17 + (lines.length > 1 ? (i - .5) * (s + 2) : 0)));
   ctx.restore();
-  sparkle(it.x + 56, it.y - 38, t + it.ph); sparkle(it.x - 60, it.y + 28, t * 1.3 + it.ph); sparkle(it.x + 46, it.y + 40, t * .8 + it.ph + 2);
+  sparkle(it.x + 58, it.y + 4, t + it.ph); sparkle(it.x - 60, it.y + 30, t * 1.3 + it.ph);
 }
 function sparkle(x, y, t) {
   const a = (Math.sin(t * 5) + 1) / 2; if (a < .3) return;
@@ -1137,7 +1165,7 @@ function update(dt) {
   const v = speed();
   G.scroll += v * dt; G.score += v * dt * .03; G.anim += dt * v / 32;
   G.spawn -= v * dt;
-  if (G.spawn <= 0) { spawnRow(); G.spawn = Math.max(340, rnd(420, 540) - G.disc * 6); }
+  if (G.spawn <= 0) { spawnRow(); G.spawn = Math.max(360, rnd(430, 540) - G.disc * 4); }
   const p = G.player;
   p.x += (LANES[p.lane] - p.x) * Math.min(1, dt * 16);
   G.invul = Math.max(0, G.invul - dt); G.shake = Math.max(0, G.shake - dt);

@@ -1,6 +1,6 @@
 // Service worker: cache do jogo para funcionar offline na feira
-const CACHE = 'futuro-adm-v7';
-const ASSETS = ['./', './index.html', './manifest.json', './icons/icon-192.png', './icons/icon-512.png', './assets/logo-ise.png', './assets/predio-isecensa.webp', './assets/professor.png'];
+const CACHE = 'futuro-adm-v8';
+const ASSETS = ['./', './index.html', './manifest.json', './icons/icon-192.png', './icons/icon-512.png', './assets/logo-ise.png', './assets/predio-isecensa.webp', './assets/professor.png', './assets/professores.webp'];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => Promise.allSettled(ASSETS.map(a => c.add(a)))).then(() => self.skipWaiting()));
