@@ -12,7 +12,7 @@
 <style>
 :root{--navy:#1b2a6b;--navy2:#24378a;--yellow:#ffc93c;--yellowD:#b97c00;--light:#c9d4ff;--ise:#0f6ea6}
 *{box-sizing:border-box;margin:0;padding:0}
-html,body{height:100%;overflow:hidden;background:radial-gradient(ellipse at center,#1f3a8a,#070b26 80%);color:#fff;font-family:"Trebuchet MS","Segoe UI",system-ui,sans-serif;user-select:none}
+html,body{-webkit-font-smoothing:antialiased;text-rendering:geometricPrecision;height:100%;overflow:hidden;background:radial-gradient(ellipse at center,#1f3a8a,#070b26 80%);color:#fff;font-family:"Trebuchet MS","Segoe UI",system-ui,sans-serif;user-select:none}
 body.kbd{cursor:none}
 /* Palco fixo 1280x720 (16:9), escalado para o monitor */
 body{display:grid;place-items:center}
@@ -30,8 +30,8 @@ body{display:grid;place-items:center}
 .btn svg{width:26px;height:26px;flex:none}
 h2{font-size:38px;font-weight:900;text-shadow:0 4px 0 #0e1847;margin:14px 0 10px;text-align:center}
 .panel{background:rgba(20,32,90,.88);border:3px solid #3e57b8;border-radius:18px;padding:20px 24px}
-kbd{display:inline-block;background:#fff;color:#14205a;border-radius:6px;padding:2px 9px;font:900 15px "Trebuchet MS",sans-serif;box-shadow:0 3px 0 #8fa6ec;margin:0 2px}
-.keys{font-weight:700;font-size:17px;color:var(--light);text-shadow:0 2px 0 #0e1847}
+kbd{display:inline-block;background:#fff;color:#14205a;border-radius:6px;padding:1px 9px;font:900 17px/1.3 "Trebuchet MS",sans-serif;border:2px solid #8fa6ec;border-bottom-width:4px;margin:0 2px;vertical-align:middle}
+.keys{font-weight:800;font-size:19px;color:#eef2ff}
 .iseRow{display:flex;align-items:center;gap:14px}
 .iseRow img{height:64px;filter:drop-shadow(0 0 6px rgba(255,255,255,.8))}
 .ribbon{background:var(--ise);color:#fff;font-weight:900;font-size:20px;letter-spacing:1.5px;text-transform:uppercase;padding:8px 20px;border-radius:10px;border:3px solid #fff;box-shadow:0 4px 0 #0b3f63}
