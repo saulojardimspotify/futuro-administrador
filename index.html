@@ -1013,6 +1013,18 @@ function drawGate(F, t) {
 
 /* ----- Cena da colação de grau ----- */
 const logoImg = new Image(); logoImg.src = 'assets/logo-ise.png';
+// Professor da colação: imagem enviada pelo professor, recortada (sem a faixa do palco) e com bordas suavizadas
+let profSprite = null;
+const profImg = new Image(); profImg.src = 'assets/professor.png';
+profImg.onload = () => {
+  const w = profImg.naturalWidth, h = Math.round(profImg.naturalHeight * .875), c = document.createElement('canvas'), x = c.getContext('2d');
+  c.width = w; c.height = h; x.drawImage(profImg, 0, 0);
+  x.globalCompositeOperation = 'destination-in';
+  const fade = (g) => { g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(.16, '#000'); g.addColorStop(.84, '#000'); g.addColorStop(1, 'rgba(0,0,0,0)'); x.fillStyle = g; x.fillRect(0, 0, w, h); };
+  fade(x.createLinearGradient(0, 0, w, 0));
+  const v = x.createLinearGradient(0, 0, 0, h); v.addColorStop(0, 'rgba(0,0,0,0)'); v.addColorStop(.14, '#000'); v.addColorStop(1, '#000'); x.fillStyle = v; x.fillRect(0, 0, w, h);
+  profSprite = c;
+};
 const PROF = { g:'m', style:'prof', hair:'#3a281c', hairD:'#1f140c', hairHi:'#6a4e3a', skin:'#eebf9c', skinD:'#d29d78', shirt:'#2b2b2b' };
 const CROWD = (() => { const a = [], skins = ['#8d5524', '#f3c99b', '#c68642', '#f6d2ad', '#6b3e19'], hairs = ['#1c1c1c', '#5a3a1a', '#f5d26b', '#1c1c1c', '#8a3a1a', '#2f7de1'];
   for (let r = 0; r < 4; r++) for (let x = 40; x < 1260; x += 46) { if (x > 560 && x < 720) continue; a.push({ x:x + (r % 2) * 23, y:470 + r * 66, s:skins[(x + r * 3) % 5], h:hairs[(x * 7 + r) % 6], p:Math.random() * 6 }); } return a; })();
@@ -1058,7 +1070,8 @@ function drawHall(F, t) {
   } else {
     const jump = clap ? Math.abs(Math.sin((T - 3.2) * 6)) * 8 : 0;
     drawChar(ctx, G.c, 465, 300 - 160 - jump, 160, { grad:true });
-    drawChar(ctx, PROF, 680, 300 - 165, 165, { grad:true, cap:false, glasses:true, stubble:true });
+    if (profSprite) { const s = 1.65, w = profSprite.width * s, h = profSprite.height * s; ctx.imageSmoothingQuality = 'high'; ctx.drawImage(profSprite, 765 - w / 2, 302 - h, w, h); }
+    else drawChar(ctx, PROF, 680, 300 - 165, 165, { grad:true, cap:false, glasses:true, stubble:true });
     // diploma passa do professor para o aluno
     const d = Math.max(0, Math.min(1, (T - 2.5) / .7)), sx = 720 + (600 - 720) * d, sy = (clap ? 210 - jump : 250) + Math.sin(d * Math.PI) * -30;
     ctx.save(); ctx.translate(sx, sy); ctx.rotate(clap ? -.5 : -.2);
